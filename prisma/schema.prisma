@@ -1,0 +1,235 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+
+//user schema
+model User {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String   @unique
+  password    String
+  status      status   @default(active)
+  role        Role     @default(user)
+  profile     String?
+  phoneNumber String?
+  expireAt    DateTime? @default(now())
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  verification     Verification?
+  location         UserLocation?
+  emergencyContact EmergencyContact[]
+  alertPost        AlertPost[]
+  subscription     Subscription[]
+  deviceHistory    DeviceHistory[]
+  payments         Payments[]
+  safeZone         SafeZone[]
+}
+
+model DeviceHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  ip        String?
+  browser   String?
+  os        String?
+  device    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Verification {
+  userId    String   @map("_id") @db.ObjectId
+  otp       Int
+  expiredAt DateTime?
+  status    Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId])
+}
+
+model UserLocation {
+  userId      String   @id @map("_id") @db.ObjectId
+  type        String   @default("Point")
+  coordinates Float[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+//SafeZone schema
+
+model SafeZone {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String   @db.ObjectId
+  description        String
+  expectedReturnTime DateTime
+  notification       Boolean  @default(true) 
+  isDeleted          Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+    // 👇 Fix here
+  startLocation SafezoneStartLocation?
+  endLocation   SafezoneEndLocation?  
+
+}
+
+model SafezoneStartLocation { 
+  safezoneId    String   @map("_id") @db.ObjectId
+  type        String   @default("Point")
+  coordinates Float[] 
+  safezone SafeZone @relation(fields: [safezoneId], references: [id])
+
+    @@id([safezoneId])
+}
+
+model SafezoneEndLocation {
+  safezoneId    String   @map("_id") @db.ObjectId 
+  type        String   @default("Point")
+  coordinates Float[]
+
+  safezone SafeZone @relation(fields: [safezoneId], references: [id])
+  @@id([safezoneId])
+}
+
+
+model Location {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  type        String   @default("Point")
+  coordinates Float[]
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt 
+}
+
+//Emergency Contact
+
+model EmergencyContact {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  profile     String
+  name        String
+  relation    String
+  phoneNumber String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+//Posts
+model AlertPost {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  alertType String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User               @relation(fields: [userId], references: [id])
+  location AlertPostLocation?
+}
+
+model AlertPostLocation {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  alertPostId String   @unique @db.ObjectId
+  type        String   @default("Point")
+  coordinates Float[]
+  images      String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  alertPost AlertPost @relation(fields: [alertPostId], references: [id])
+}
+
+//contents
+model Contents {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  termsAndCondition String
+  privacyPolicy     String
+  aboutUs           String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+ @@map("contents")
+}
+
+model Package {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  descriptions String
+  price        Float
+  durationDay  Int
+  isDeleted    Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  subscription Subscription[]
+}
+
+model Subscription {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  packageId  String   @db.ObjectId
+  userId     String   @db.ObjectId
+  expiredAt  DateTime
+  isActivate Boolean  @default(false)
+  isPaid     Boolean  @default(false)
+  isDeleted  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  package  Package    @relation(fields: [packageId], references: [id])
+  user     User       @relation(fields: [userId], references: [id])
+  payments Payments[]
+
+  // @@unique([userId, packageId]) 
+}
+
+model Payments {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  subscriptionId String   @db.ObjectId
+  userId         String   @db.ObjectId
+  price          Float
+  trnId          String
+  isPaid         Boolean  @default(false)
+  isDeleted      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+}
+
+enum status {
+  active
+  blocked
+}
+
+enum Role {
+  admin
+  sub_admin
+  supper_admin
+  user
+}
+
+
+ 

@@ -8,8 +8,8 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "generate": "node src/generateFolder.ts",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "generate": "ts-node src/generateFolder.ts",
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
     "lint:check": "eslint --ignore-path .eslintignore --ext .js,.ts .",
     "lint:fix": "eslint . --fix",
     "start": "tsc --watch",
@@ -17,7 +17,7 @@
     "prettier:fix": "prettier --write .",
     "lint-prettier": "npm run lint:check && npm run prettier:check",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:prod": "node ./dist/server.js",
+    "start:prod": "node -r tsconfig-paths/register dist/server.js",
     "prisma:generate": "npx prisma generate",
     "prisma:migrate": "npx prisma db push",
     "prisma:studio": "npx prisma studio"
@@ -61,6 +61,7 @@
     "moment": "^2.30.1",
     "prisma-erd-generator": "^2.0.4",
     "puppeteer": "^24.12.1",
+    "tsconfig-paths": "^4.2.0",
     "typescript-eslint": "^8.36.0"
   }
 }

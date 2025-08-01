@@ -1,9 +1,9 @@
+import auth from '@app/middleware/auth';
 import { Router } from 'express';
-import auth from '../../middleware/auth';
-import { safeZoneController } from './safezone.controller';
 import { USER_ROLE } from '../users/user.constants';
-import validateRequest from 'app/middleware/validateRequest';
+import validateRequest from '@app/middleware/validateRequest';
 import { safeZoneValidator } from './safezone.validator';
+import { safeZoneController } from './safezone.controller';
 
 const router = Router();
 

@@ -1,10 +1,11 @@
+import AppError from '@app/error/AppError';
+import { paginationHelper } from '@app/helpers/pagination.helpers';
+import prisma from '@app/shared/prisma';
+import pickQuery from '@app/utils/pickQuery';
 import { Prisma } from '@prisma/index';
-import AppError from 'app/error/AppError';
-import { paginationHelper } from 'app/helpers/pagination.helpers';
-import prisma from 'app/shared/prisma';
-import pickQuery from 'app/utils/pickQuery';
-import httpStatus from 'http-status'; 
-const createSafezone = async (payload: any) => {
+import httpStatus from 'http-status';
+
+const createSafezone = async (payload: Prisma.SafeZoneCreateInput) => {
   try {
     const result = await prisma.safeZone.create({
       data: payload,
@@ -26,7 +27,10 @@ const createSafezone = async (payload: any) => {
   }
 };
 
-const updateSafezone = async (id: string, payload: any) => {
+const updateSafezone = async (
+  id: string,
+  payload: Prisma.SafeZoneUpdateInput,
+) => {
   try {
     const result = await prisma.safeZone.update({
       where: {

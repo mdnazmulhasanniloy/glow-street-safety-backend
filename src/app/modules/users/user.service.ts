@@ -48,7 +48,7 @@ const create = async (payload: User) => {
     }
     const result = await prisma.user.create({ data: payload });
 
-    // নতুন user হলে
+ 
     return result;
   } catch (error: any) {
     throw new AppError(httpStatus?.BAD_GATEWAY, error?.message);

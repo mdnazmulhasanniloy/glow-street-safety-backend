@@ -1,7 +1,7 @@
-import catchAsync from 'app/utils/catchAsync';
-import { safeZoneService } from './safezone.service';
-import sendResponse from 'app/utils/sendResponse';
+import catchAsync from '@app/utils/catchAsync';
 import httpStatus from 'http-status';
+import { safeZoneService } from './safezone.service';
+import sendResponse from '@app/utils/sendResponse';
 
 const createSafezone = catchAsync(async (req, res) => {
   req.body.userId = req.user.userId;

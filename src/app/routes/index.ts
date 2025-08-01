@@ -1,7 +1,7 @@
+import { otpRoutes } from '@app/modules/otp/otp.routes';
+import { safeZoneRoutes } from '@app/modules/safezone/safezone.route';
+import { userRoutes } from '@app/modules/users/users.routes';
 import { Router } from 'express';
-import { userRoutes } from '../modules/users/users.routes';
-import { otpRoutes } from '../modules/otp/otp.routes';
-import { safeZoneRoutes } from 'app/modules/safezone/safezone.route';
 
 const router = Router();
 const moduleRoutes = [

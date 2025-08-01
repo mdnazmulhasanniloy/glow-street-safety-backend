@@ -56,11 +56,12 @@ const updateSafezone = async (
 
 const getById = async (id: string) => {
   try {
-    const result = prisma.safeZone.findFirst({
-      where: { id, isDeleted: false },
+    const result = await prisma.safeZone.findUnique({
+      where: { id },
       include: { startLocation: true, endLocation: true },
     });
-    if (!result) throw new AppError(httpStatus.BAD_REQUEST, 'safezone ');
+    if (!result || result.isDeleted)
+      throw new AppError(httpStatus.BAD_REQUEST, 'safezone ');
     return result;
   } catch (error: any) {
     throw new AppError(

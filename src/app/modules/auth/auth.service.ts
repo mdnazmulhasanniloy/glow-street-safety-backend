@@ -116,7 +116,7 @@ const login = async (payload: ILogin, req: Request) => {
 };
 
 const changePassword = async (id: string, payload: IChangePassword) => {
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: { id },
   });
   if (!user) {
@@ -215,7 +215,7 @@ const resetPassword = async (token: string, payload: IResetPassword) => {
     );
   }
 
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: { id: decode?.userId },
     include: {
       verification: {
@@ -271,7 +271,7 @@ const refreshToken = async (token: string) => {
   // Checking if the given token is valid
   const decoded = verifyToken(token, config.jwt_refresh_secret as string);
   const { userId } = decoded;
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
       verification: {

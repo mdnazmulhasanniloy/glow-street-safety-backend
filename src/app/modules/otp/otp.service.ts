@@ -103,7 +103,7 @@ const verifyOtp = async (token: string, otp: string | number) => {
     );
   }
 
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: { id: decode.userId },
     include: { verification: true },
   });

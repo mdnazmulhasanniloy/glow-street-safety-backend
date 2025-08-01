@@ -4,6 +4,8 @@ import auth from '@app/middleware/auth';
 import { USER_ROLE } from '../users/user.constants';
 import multer, { memoryStorage } from 'multer';
 import parseData from '@app/middleware/parseData';
+import validateRequest from '@app/middleware/validateRequest';
+import { emergencyContactValidator } from './emergencyContact.validation';
 
 const router = Router();
 const storage = memoryStorage();
@@ -12,15 +14,17 @@ const upload = multer({ storage });
 router.post(
   '/',
   auth(USER_ROLE.user),
-  upload.single('profile'),
   parseData(),
+  validateRequest(emergencyContactValidator.updateSchema),
+  upload.single('profile'),
   emergencyContactController.createEmergencyContact,
 );
 router.patch(
   '/:id',
   auth(USER_ROLE.user),
-  upload.single('profile'),
   parseData(),
+  validateRequest(emergencyContactValidator.updateSchema),
+  upload.single('profile'),
   emergencyContactController.updateEmergencyContact,
 );
 router.delete(

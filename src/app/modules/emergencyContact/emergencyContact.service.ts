@@ -83,10 +83,10 @@ const getAllEmergencyContact = async (query: Record<string, any>) => {
 };
 
 const getEmergencyContactById = async (id: string) => {
-  const result = await prisma.emergencyContact.findFirst({
-    where: { id, isDeleted: false },
+  const result = await prisma.emergencyContact.findUnique({
+    where: { id },
   });
-  if (!result) {
+  if (!result || result.isDeleted) {
     throw new AppError(httpStatus.BAD_REQUEST, 'EmergencyContact not found!');
   }
   return result;

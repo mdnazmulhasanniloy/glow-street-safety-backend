@@ -127,7 +127,7 @@ model Location {
 model EmergencyContact {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @db.ObjectId
-  profile     String
+  profile     String?
   name        String
   relation    String
   phoneNumber String

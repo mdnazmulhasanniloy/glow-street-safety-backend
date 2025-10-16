@@ -1,10 +1,9 @@
 import { Server } from 'http';
 import app from './app';
-import config from './app/config'; 
-import { exec } from 'child_process';
-//@ts-ignore
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
-const colors = require('colors');
+import config from './app/config';
+import colors from 'colors';
+import { defaultTask } from '@app/utils/defaultTask';
+
 let server: Server;
 let currentPort: number = Number(config.port) | 5000;
 let portCount = 0;
@@ -12,21 +11,17 @@ let portCount = 0;
 async function main() {
   server = app.listen(Number(currentPort), config?.ip as string, () => {
     console.log(
-      //@ts-ignore
-      '✨ Simple Server Listening on \n'.italic.brightGreen +
-        //@ts-ignore
-        `💫 http://${config?.ip}:${currentPort}`.bold.brightBlue,
+      colors.italic.green.bold(
+        `💫 Simple Server Listening on  http://${config?.ip}:${currentPort} `,
+      ),
     );
-
-    // urlLauncher(`http://${config?.ip}:${currentPort}`);
-
-    // urlLauncher(`http://${config?.ip}:${currentPort}`);
   });
 
+  defaultTask();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
       console.warn(
-        //@ts-ignore
         `⚠️  Port ${currentPort} is in use. Trying next port...`.yellow,
       );
       if (portCount < 10) {
@@ -34,7 +29,6 @@ async function main() {
         portCount++;
         main(); // retry with next port
       } else {
-        //@ts-ignore
         console.error('❌ Max retries reached. Could not start server.'.red);
         process.exit(1);
       }
@@ -44,24 +38,24 @@ async function main() {
     }
   });
 }
-const urlLauncher = (url: string) => {
-  const platform = process.platform;
+// const urlLauncher = (url: string) => {
+//   const platform = process.platform;
 
-  let command = '';
-  if (platform === 'win32') {
-    command = `start ${url}`;
-  } else if (platform === 'darwin') {
-    command = `open ${url}`;
-  } else { 
-    command = `xdg-open ${url}`;
-  }
+//   let command = '';
+//   if (platform === 'win32') {
+//     command = `start ${url}`;
+//   } else if (platform === 'darwin') {
+//     command = `open ${url}`;
+//   } else {
+//     command = `xdg-open ${url}`;
+//   }
 
-  exec(command, err => {
-    if (err) {
-      console.error('🚫 Failed to open browser automatically:', err);
-    }
-  });
-};
+//   exec(command, err => {
+//     if (err) {
+//       console.error('🚫 Failed to open browser automatically:', err);
+//     }
+//   });
+// };
 
 main();
 

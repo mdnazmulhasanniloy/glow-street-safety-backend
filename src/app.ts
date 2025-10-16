@@ -7,6 +7,8 @@ import notFound from './app/middleware/notfound';
 
 const app: Application = express();
 app.use(express.static('public'));
+app.set('view engine', 'ejs');
+app.set('views', 'public/ejs');
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
 

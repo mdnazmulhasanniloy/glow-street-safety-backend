@@ -47,6 +47,7 @@ router.delete(
   ),
   userController.deleteMYAccount,
 );
+
 router.delete(
   '/:id',
   auth(USER_ROLE.admin, USER_ROLE.sub_admin, USER_ROLE.super_admin),

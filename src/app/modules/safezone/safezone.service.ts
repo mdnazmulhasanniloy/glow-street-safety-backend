@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppError from '@app/error/AppError';
 import { paginationHelper } from '@app/helpers/pagination.helpers';
 import prisma from '@app/shared/prisma';
@@ -6,9 +7,18 @@ import { Prisma } from '@prisma/index';
 import httpStatus from 'http-status';
 
 const createSafezone = async (payload: Prisma.SafeZoneCreateInput) => {
+  const { startLocation, endLocation, ...data } = payload;
   try {
     const result = await prisma.safeZone.create({
-      data: payload,
+      data: {
+        ...data,
+        startLocation: {
+          create: startLocation,
+        },
+        endLocation: {
+          create: endLocation,
+        },
+      },
       include: {
         endLocation: true,
         startLocation: true,
@@ -31,12 +41,27 @@ const updateSafezone = async (
   id: string,
   payload: Prisma.SafeZoneUpdateInput,
 ) => {
+  const { startLocation, endLocation, ...data } = payload;
+
+  if (startLocation) {
+    payload['startLocation'] = {
+      create: startLocation,
+    };
+  }
+
+  if (endLocation) {
+    payload['endLocation'] = {
+      create: endLocation,
+    };
+  }
+
   try {
     const result = await prisma.safeZone.update({
       where: {
         id: id,
+        isDeleted: false,
       },
-      data: payload,
+      data: data,
       include: {
         endLocation: true,
         startLocation: true,
@@ -46,6 +71,8 @@ const updateSafezone = async (
     if (!result) {
       throw new AppError(httpStatus.BAD_REQUEST, 'safezone update failed!');
     }
+
+    return result;
   } catch (error: any) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -93,6 +120,9 @@ const getAllSafezone = async (query: Record<string, any>) => {
     const andArray = Array.isArray(oldAnd) ? oldAnd : oldAnd ? [oldAnd] : [];
 
     where.AND = [
+      {
+        isDeleted: false,
+      },
       ...andArray,
       ...Object.entries(filtersData).map(([key, value]) => ({
         [key]: { equals: value },
@@ -142,6 +172,7 @@ const deleteSafezone = async (id: string) => {
         isDeleted: true,
       },
     });
+    return result;
   } catch (error: any) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -151,9 +182,9 @@ const deleteSafezone = async (id: string) => {
 };
 
 export const safeZoneService = {
+  getById,
   createSafezone,
   updateSafezone,
   getAllSafezone,
-  getById,
   deleteSafezone,
 };

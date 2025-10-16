@@ -1,10 +1,10 @@
-import { includes } from 'zod';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AppError from '../../error/AppError';
 import httpStatus from 'http-status';
 import HashPassword from '../../shared/hashPassword';
-import pickQuery from '../../utils/pickQuery'; 
+import pickQuery from '../../utils/pickQuery';
 import { paginationHelper } from '../../helpers/pagination.helpers';
-import { Role, status, User } from '../../../generated/prisma';
+import { Role, User } from '../../../generated/prisma';
 import prisma from '../../shared/prisma';
 import { Prisma } from '@prisma/client';
 
@@ -48,7 +48,6 @@ const create = async (payload: User) => {
     }
     const result = await prisma.user.create({ data: payload });
 
- 
     return result;
   } catch (error: any) {
     throw new AppError(httpStatus?.BAD_GATEWAY, error?.message);
@@ -60,7 +59,12 @@ const getAll = async (query: Record<string, any>) => {
 
   const { searchTerm, ...filtersData } = filters;
 
-  let pipeline: Prisma.UserWhereInput = {};
+  // eslint-disable-next-line prefer-const
+  let pipeline: Prisma.UserWhereInput = {
+    AND: {
+      isDeleted: false,
+    },
+  };
 
   // search condition
   if (searchTerm) {
@@ -78,6 +82,9 @@ const getAll = async (query: Record<string, any>) => {
     const oldAndArray = Array.isArray(oldAnd) ? oldAnd : oldAnd ? [oldAnd] : [];
 
     pipeline.AND = [
+      {
+        isDeleted: false,
+      },
       ...oldAndArray,
       ...Object.entries(filtersData).map(([key, value]) => ({
         [key]: { equals: value },
@@ -198,6 +205,8 @@ const deleteUser = async (id: string) => {
     },
     data: { isDeleted: true },
   });
+
+  return result;
 };
 export const userService = {
   create,

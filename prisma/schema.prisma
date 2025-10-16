@@ -26,6 +26,7 @@ model User {
   role        Role     @default(user)
   profile     String?
   phoneNumber String?
+  customerId String?
   expireAt    DateTime? @default(now())
   isDeleted   Boolean  @default(false)
   createdAt   DateTime @default(now())
@@ -54,7 +55,7 @@ model DeviceHistory {
   user User @relation(fields: [userId], references: [id])
 }
 
-model Verification {
+model Verification { 
   userId    String   @map("_id") @db.ObjectId
   otp       Int
   expiredAt DateTime?
@@ -142,10 +143,11 @@ model AlertPost {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
   alertType String
+  images      String[]
+  description String
   isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   user     User               @relation(fields: [userId], references: [id])
   location AlertPostLocation?
 }
@@ -154,8 +156,7 @@ model AlertPostLocation {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   alertPostId String   @unique @db.ObjectId
   type        String   @default("Point")
-  coordinates Float[]
-  images      String[]
+  coordinates Float[] 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -175,14 +176,14 @@ model Contents {
 }
 
 model Package {
-  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   title        String
   descriptions String
   price        Float
   durationDay  Int
-  isDeleted    Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  isDeleted    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   subscription Subscription[]
 }
 
@@ -190,18 +191,16 @@ model Subscription {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   packageId  String   @db.ObjectId
   userId     String   @db.ObjectId
-  expiredAt  DateTime
+  expiredAt  DateTime?
   isActivate Boolean  @default(false)
   isPaid     Boolean  @default(false)
   isDeleted  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  package  Package    @relation(fields: [packageId], references: [id])
-  user     User       @relation(fields: [userId], references: [id])
+  package  Package @relation(fields: [packageId], references: [id])
+  user     User    @relation(fields: [userId], references: [id])
   payments Payments[]
-
-  // @@unique([userId, packageId]) 
 }
 
 model Payments {
@@ -209,7 +208,8 @@ model Payments {
   subscriptionId String   @db.ObjectId
   userId         String   @db.ObjectId
   price          Float
-  trnId          String
+  trnId          String?
+  receipt_url          String?
   isPaid         Boolean  @default(false)
   isDeleted      Boolean  @default(false)
   createdAt      DateTime @default(now())

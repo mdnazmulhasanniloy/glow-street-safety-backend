@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
 import AppError from '../../error/AppError';
 import prisma from 'app/shared/prisma';
@@ -24,7 +25,11 @@ const getAllEmergencyContact = async (query: Record<string, any>) => {
   const { filters, pagination } = await pickQuery(query);
   const { searchTerm, ...filtersData } = filters;
 
-  const where: Prisma.EmergencyContactWhereInput = {};
+  const where: Prisma.EmergencyContactWhereInput = {
+    AND: {
+      isDeleted: false,
+    },
+  };
 
   // Search condition
   if (searchTerm) {
@@ -42,6 +47,9 @@ const getAllEmergencyContact = async (query: Record<string, any>) => {
     const andArray = Array.isArray(oldAnd) ? oldAnd : oldAnd ? [oldAnd] : [];
 
     where.AND = [
+      {
+        isDeleted: false,
+      },
       ...andArray,
       ...Object.entries(filtersData).map(([key, value]) => ({
         [key]: { equals: value },

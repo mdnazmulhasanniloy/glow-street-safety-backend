@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import httpStatus from 'http-status';
 import AppError from '../../error/AppError';
 import { Prisma } from '@prisma/index';
@@ -6,19 +7,45 @@ import prisma from '@app/shared/prisma';
 import pickQuery from '@app/utils/pickQuery';
 import { paginationHelper } from '@app/helpers/pagination.helpers';
 
-const createPackage = async (payload: Prisma.PackageCreateInput) => {
-  const result = await prisma.package.create({ data: payload });
+const createSubscription = async (payload: Prisma.SubscriptionCreateInput) => {
+  const pkg = await prisma.package.findFirst({
+    //@ts-ignore
+    where: { id: payload.packageId },
+  });
+  if (!pkg) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Package not found!');
+  }
+
+  const isHaveSub = await prisma.subscription.findFirst({
+    where: {
+      //@ts-ignore
+      userId: payload?.userId,
+      //@ts-ignore
+      packageId: payload?.packageId,
+      isActivate: false,
+      isPaid: false,
+      isDeleted: false,
+    },
+  });
+
+  if (isHaveSub) {
+    return isHaveSub;
+  }
+
+  const result = await prisma.subscription.create({
+    data: payload,
+  });
   if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create package');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create subscription');
   }
   return result;
 };
 
-const getAllPackage = async (query: Record<string, any>) => {
+const getAllSubscription = async (query: Record<string, any>) => {
   const { filters, pagination } = await pickQuery(query);
   const { searchTerm, ...filtersData } = filters;
 
-  const where: Prisma.PackageWhereInput = {
+  const where: Prisma.SubscriptionWhereInput = {
     AND: {
       isDeleted: false,
     },
@@ -65,14 +92,14 @@ const getAllPackage = async (query: Record<string, any>) => {
     : [];
 
   // Fetch data
-  const data = await prisma.package.findMany({
+  const data = await prisma.subscription.findMany({
     where,
     skip,
     take: limit,
     orderBy,
   });
 
-  const total = await prisma.package.count({ where });
+  const total = await prisma.subscription.count({ where });
 
   return {
     data,
@@ -80,42 +107,44 @@ const getAllPackage = async (query: Record<string, any>) => {
   };
 };
 
-const getPackageById = async (id: string) => {
-  const result = await prisma.package.findUnique({ where: { id } });
+const getSubscriptionById = async (id: string) => {
+  const result = await prisma.subscription.findFirst({ where: { id } }); 
   if (!result || result?.isDeleted) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Package not found!');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Subscription not found!');
   }
   return result;
 };
 
-const updatePackage = async (
+const updateSubscription = async (
   id: string,
-  payload: Prisma.PackageUpdateInput,
+  payload: Prisma.SubscriptionUpdateInput,
 ) => {
-  const result = await prisma.package.update({ where: { id }, data: payload });
-  if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update Package');
-  }
-  return result;
-};
-
-const deletePackage = async (id: string) => {
-  const result = await prisma.package.update({
-    where: {
-      id,
-    },
-    data: { isDeleted: true },
+  const result = await prisma.subscription.update({
+    where: { id },
+    data: payload,
   });
   if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete package');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update Subscription');
   }
   return result;
 };
 
-export const packageService = {
-  createPackage,
-  getAllPackage,
-  getPackageById,
-  updatePackage,
-  deletePackage,
+const deleteSubscription = async (id: string) => {
+  const result = await prisma.subscription.update({
+    where: { id },
+    data: { isDeleted: true },
+  });
+
+  if (!result) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete subscription');
+  }
+  return result;
+};
+
+export const subscriptionService = {
+  createSubscription,
+  getAllSubscription,
+  getSubscriptionById,
+  updateSubscription,
+  deleteSubscription,
 };

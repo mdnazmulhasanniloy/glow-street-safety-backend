@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   IChangePassword,
   IJwtPayload,
@@ -79,6 +80,7 @@ const login = async (payload: ILogin, req: Request) => {
     '';
 
   const userAgent = req.headers['user-agent'] || '';
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   //@ts-ignore
   const parser = new UAParser(userAgent);
   const result = parser.getResult();
@@ -208,7 +210,8 @@ const resetPassword = async (token: string, payload: IResetPassword) => {
   let decode;
   try {
     decode = verifyToken(token, config.jwt_access_secret as string);
-  } catch (err) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (err:any) {
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       'Session has expired. Please try again',

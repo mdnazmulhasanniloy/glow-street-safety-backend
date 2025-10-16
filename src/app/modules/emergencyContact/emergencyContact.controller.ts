@@ -6,7 +6,7 @@ import { uploadToS3 } from '@app/utils/s3';
 
 const createEmergencyContact = catchAsync(
   async (req: Request, res: Response) => {
-    req.body['userId'] = req.user.serId;
+    req.body['userId'] = req.user.userId; 
     if (req?.file) {
       req.body.profile = await uploadToS3({
         file: req.file,
@@ -38,7 +38,6 @@ const getAllEmergencyContact = catchAsync(
     });
   },
 );
-
 
 const getMyEmergencyContact = catchAsync(
   async (req: Request, res: Response) => {

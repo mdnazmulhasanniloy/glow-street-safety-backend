@@ -14,17 +14,17 @@ const upload = multer({ storage });
 router.post(
   '/',
   auth(USER_ROLE.user),
+  upload.single('profile'),
   parseData(),
   validateRequest(emergencyContactValidator.updateSchema),
-  upload.single('profile'),
   emergencyContactController.createEmergencyContact,
 );
 router.patch(
   '/:id',
   auth(USER_ROLE.user),
+  upload.single('profile'),
   parseData(),
   validateRequest(emergencyContactValidator.updateSchema),
-  upload.single('profile'),
   emergencyContactController.updateEmergencyContact,
 );
 router.delete(
